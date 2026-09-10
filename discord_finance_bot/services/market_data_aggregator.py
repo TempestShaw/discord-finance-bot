@@ -10,6 +10,7 @@ This service orchestrates data from:
 Single responsibility: Aggregate and normalize market data from multiple sources.
 """
 
+import asyncio
 from typing import Dict, List, Optional
 from services.finance.yahoo_finance_service import YahooFinanceService
 from services.finance.sector_chart_service import SectorChartService
@@ -91,6 +92,9 @@ class MarketDataAggregator:
         return summary
 
     async def get_stock_data(self, ticker: str, period: str = "3mo"):
+        return await asyncio.to_thread(self._get_stock_data_sync, ticker, period)
+
+    def _get_stock_data_sync(self, ticker: str, period: str = "3mo"):
         # Fetch stock data
         data = self.yahoo_finance.fetch_stock_data(ticker, period=period)
 

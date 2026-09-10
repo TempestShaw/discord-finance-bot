@@ -122,7 +122,9 @@ class BotController(commands.Bot):
 
             except Exception as e:
                 self.logger.error(f"Error handling stock command for {ticker}: {e}")
-                await ctx.send(f"❌ Error fetching data for **{ticker}**: {str(e)}")
+                await ctx.send(
+                    f"❌ Unable to fetch data for **{ticker}**. Check the bot logs for details."
+                )
 
         async def today_cmd(ctx):
             try:
@@ -130,7 +132,7 @@ class BotController(commands.Bot):
                 await ctx.send(text)
             except Exception as e:
                 self.logger.error(f"Error handling today command: {e}")
-                await ctx.send(f"❌ Error generating summary: {str(e)}")
+                await ctx.send("❌ Unable to generate the summary. Check the bot logs for details.")
 
         async def today_json_cmd(ctx):
             try:
@@ -140,7 +142,7 @@ class BotController(commands.Bot):
                 )
             except Exception as e:
                 self.logger.error(f"Error handling today_json command: {e}")
-                await ctx.send(f"❌ Error generating JSON: {str(e)}")
+                await ctx.send("❌ Unable to generate the JSON payload. Check the bot logs for details.")
 
         # Register commands
         self._stock_cmd = self.command(name='stock', aliases=['s'])(stock_cmd)
