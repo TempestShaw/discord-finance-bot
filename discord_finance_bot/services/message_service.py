@@ -1,6 +1,5 @@
 from services.alphavantage_service import AlphaVantageService
 from services.web_crawler_service import WebCrawlerService
-from services.market_data_aggregator import MarketDataAggregator
 from zoneinfo import ZoneInfo
 import datetime as dt
 
@@ -16,7 +15,6 @@ class MessageService:
         # Initialize data source services
         self.alpha_service = AlphaVantageService(config)
         self.web_crawler_service = WebCrawlerService(config)
-        self.market_data = MarketDataAggregator(config)
 
     def generate_daily_summary_json(self):
         """Return standardized JSON payload (sync version)."""
@@ -57,9 +55,9 @@ class MessageService:
         }
 
     async def generate_daily_summary_json_async(self):
-        """Async version - use MarketDataAggregator for complete data."""
-        # Get all market data from aggregator
-        summary = await self.market_data.get_daily_market_summary()
+        """Async version using the service dependencies owned by this class."""
+        top_sectors_details = await self.web_crawler_service.get_top_sectors_details_async()
+        polymarket_earnings = await self.web_crawler_service.get_polymarket_earnings_async()
 
         today = dt.datetime.now(ZoneInfo(self.config.timezone)).date()
         dates = [today, today + dt.timedelta(days=1), today + dt.timedelta(days=2)]
@@ -85,14 +83,14 @@ class MessageService:
                 "tradeVolumn": s.get("tradeVolumn"),
                 "backgroundImageUrl": s.get("backgroundImageUrl"),
             }
-            for s in summary.get("top_sectors_details", [])
+            for s in top_sectors_details
         ]
 
         # Combine all data
         return {
             "top_sectors_details": sectors_mapped,
             "earnings": earnings,
-            "polymarket_earnings": summary.get("polymarket_earnings", []),
+            "polymarket_earnings": polymarket_earnings,
             "ipos": ipos,
             "dates": [d.isoformat() for d in dates],
         }
