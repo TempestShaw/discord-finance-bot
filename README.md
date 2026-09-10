@@ -1,31 +1,39 @@
-# Discord Finance Bot
+<p align="center">
+  <img src="assets/discord-finance-bot.png" alt="Discord Finance Bot logo" width="240">
+</p>
 
-A Python Discord bot for daily market summaries, stock charts, earnings, IPOs, sector data, and prediction-market signals.
+<h1 align="center">Discord Finance Bot</h1>
 
-The bot can run against live providers, but it also includes a credential-free demo so the message pipeline can be inspected without a Discord token, API keys, or browser automation.
+<p align="center">Daily market summaries and stock research inside Discord.</p>
 
-## What works
+<p align="center">
+  <a href="#offline-demo">Offline demo</a> ·
+  <a href="#live-bot">Live bot</a> ·
+  <a href="#architecture">Architecture</a>
+</p>
 
-- `!stock AAPL` or `!s AAPL 3mo` — fetch a Yahoo Finance chart and summary.
-- `!today` — generate a Markdown daily market summary.
-- `!today_json` — return the structured summary payload.
-- Scheduled daily summaries through the Discord bot scheduler.
-- Provider adapters for Yahoo Finance, Alpha Vantage, Polymarket, and sector scraping.
+Discord Finance Bot collects market data from provider adapters and turns it into Discord commands, Markdown summaries, JSON payloads, and scheduled messages. It supports Yahoo Finance charts, earnings, IPOs, sector data, and prediction-market signals.
 
-Live provider coverage depends on credentials, provider availability, and the local Playwright browser installation. Missing data is returned as an empty section rather than invented values.
+## Start with the offline demo
 
-## Run the offline demo
-
-The demo uses fixture data and makes no network calls:
+Run the message pipeline with fixture data. No Discord token, API key, browser, or network call is required:
 
 ```bash
-cd discord_finance_bot
-python demo.py
+python discord_finance_bot/demo.py
 ```
 
-It prints the same Markdown summary shape used by the `!today` command.
+The demo prints the same Markdown summary shape used by the live `!today` command.
 
-## Run the bot
+## Why use it?
+
+- **Inspect the output first.** The offline demo makes the user-visible summary reproducible.
+- **Use one command surface.** `!stock`, `!today`, and `!today_json` expose charts, readable summaries, and structured data.
+- **Keep providers replaceable.** External data access lives behind repository and service modules.
+- **Keep unavailable data visible.** Provider failures produce empty sections or explicit errors instead of fabricated values.
+
+## Live bot
+
+Requires Python, the dependencies in `discord_finance_bot/requirements.txt`, and a Chromium installation for the browser-backed providers.
 
 ```bash
 cd discord_finance_bot
@@ -35,7 +43,7 @@ python -m pip install -r requirements.txt
 python -m playwright install chromium
 ```
 
-Set the required environment variables before starting:
+Set environment variables before starting:
 
 ```bash
 export DISCORD_TOKEN="your-discord-bot-token"
@@ -46,16 +54,25 @@ export ALPHAVANTAGE_API_KEY="optional-api-key"
 python main.py
 ```
 
-Keep tokens and API keys in environment variables. Never commit `.env` files or credentials.
+## Commands
 
-## Test
+| Command | Result |
+| --- | --- |
+| `!stock AAPL` | Fetch a stock chart and latest price summary. |
+| `!s AAPL 3mo` | Same chart command with an explicit period. |
+| `!today` | Generate a readable daily market summary. |
+| `!today_json` | Return the structured summary payload. |
 
-```bash
-cd discord_finance_bot
-python -m pytest tests -q
-```
+## What is included?
 
-The tests mock external providers. The offline demo is the fastest smoke test for the user-visible summary format.
+| Capability | Implementation |
+| --- | --- |
+| Stock charts | Yahoo Finance and `mplfinance` |
+| Earnings and IPOs | Alpha Vantage adapter |
+| Prediction-market data | Polymarket scraper |
+| Sector data | Browser-backed sector provider |
+| Scheduling | APScheduler |
+| Discord delivery | `discord.py` embeds and file attachments |
 
 ## Architecture
 
@@ -68,5 +85,14 @@ Discord commands / scheduler
             ↓
  Yahoo Finance · Alpha Vantage · Polymarket · sector data
 ```
+
+## Test
+
+```bash
+cd discord_finance_bot
+python -m pytest tests -q
+```
+
+The tests mock external providers. Keep tokens and API keys in environment variables; never commit `.env` files or credentials.
 
 This project is for research and automation. It does not provide investment advice or recommendations to buy or sell securities.
